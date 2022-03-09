@@ -1,4 +1,10 @@
+body{
+    background: #6592CF;
+    
+}
 .grid{
+    background: #191919;
+    margin-left: 30%;
     position: absolute;
     width: 560px;
     height: 300px;
@@ -9,7 +15,7 @@
     position: absolute;
     width: 100px;
     height: 20px;
-    background-color: blue;
+    background-color:#F9E492;
     left: 50px;
     bottom: 50px;
 }
@@ -17,7 +23,7 @@
     position: absolute;
     width: 100px;
     height: 20px;
-    background-color: purple;
+    background-color: white;
     left: 50px;
     bottom: 50px;
 }
@@ -26,6 +32,6 @@
     width:20px;
     height: 20px;
     border-radius: 10px;
-    background-color: red;
+    background-color:#D25B70;
 
 }
