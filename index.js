@@ -7,10 +7,12 @@ const boardWidght=560
 const ballDiameter=20
 const boardHeight=300
 
-let xDirections=2
+let xDirections=-2
 let yDirections=2
 
 let timerID
+
+let score=0
 
 const userStart=[230,10]
 let currentPosition=userStart
@@ -125,13 +127,42 @@ timerID= setInterval(moveBall,30)
 
 //check for collisions
 function checkForCollisions(){
+    //check for block collisions
+    for(let i=0;i<blockArray.length;i++)
+    {
+    if((ballCurrentPosition[0]>blockArray[i].bottomLeft[0]&& ballCurrentPosition[0]<blockArray[i].bottomRight[0])&&((ballCurrentPosition[1]+ballDiameter)>blockArray[i].bottomLeft[1]) 
+    && ballCurrentPosition[1]<blockArray[i].topLeft[1]){
+        const allBlocks =Array.from(document.querySelectorAll('.blockcss'))///////chchchchchc
+        allBlocks[i].classList.remove('blockcss')
+        blockArray.splice(i,1)
+        changeDirection()
+
+        score++
+        scoreDisplay.innerHTML=score
+
+        //check for win
+        if(blockArray.length === 0){
+            scoreDisplay.innerHTML="You Win"
+            clearInterval(timerID)
+            document.removeEventListener('keydown', moveUser)
+        }
+    }
+    }
+
+
     //check for wall collisions
     if(ballCurrentPosition[0]>=(boardWidght- ballDiameter)|| ballCurrentPosition[1]>=(boardHeight-ballDiameter) || ballCurrentPosition[0]<=0)
     {
         changeDirection()
     }
 
+//check for usercollisions
 
+if ((ballCurrentPosition[0]>currentPosition[0] && ballCurrentPosition[0]<currentPosition[0]+blockWidth)
+&& (ballCurrentPosition[1]>currentPosition[1] && ballCurrentPosition[1]< currentPosition[1]+blockHeight))
+{
+    changeDirection()
+}
 
 //check for game over
 if(ballCurrentPosition[1]<=0)
@@ -142,27 +173,27 @@ if(ballCurrentPosition[1]<=0)
     document.removeEventListener('keydown', moveUser)
     
 }}
-
+   
 
 function changeDirection(){
     if(xDirections === 2 && yDirections===2){
         yDirections=-2
         return
     }
-    if(xDirections== 2 && yDirections== -2){
+    if(xDirections === 2 && yDirections === -2){
         xDirections=-2
         return
     }
-    if(xDirections ==-2 && yDirections ==-2)
+    if(xDirections ===-2 && yDirections === -2)
     {
-        yDirections=2
+        yDirections=2 
         return
     }
-    if(xDirections=-2 && yDirections==2){
+    if(xDirections ===-2 && yDirections === 2){
         xDirections=2
+        return
     }
 
 
 }
 
-//2:17
