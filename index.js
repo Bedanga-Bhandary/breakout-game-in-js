@@ -1,199 +1,79 @@
-const grid = document.querySelector('.grid')
-const scoreDisplay = document.querySelector('#score')
+import Grid from "./Grid.js"
+import Tile from "./Tile.js"
 
-const blockWidth =100
-const blockHeight=20
-const boardWidght=560
-const ballDiameter=20
-const boardHeight=300
+const gameBoard = document.getElementById("game-board")
 
-let xDirections=-2
-let yDirections=2
 
-let timerID
+const grid= new Grid(gameBoard)
+console.log(grid.randomEmptyCell())
+grid.randomEmptyCell().tile = new Tile(gameBoard)
+grid.randomEmptyCell().tile= new Tile(gameBoard)
+setupInput()
 
-let score=0
-
-const userStart=[230,10]
-let currentPosition=userStart
-
-const ballstart=[270,40]
-let ballCurrentPosition = ballstart
-//To create block
-class Block{
-    constructor(xAxis,yAxis){
-    this.bottomLeft =[xAxis,yAxis]
-    this.bottomRight =[xAxis+blockWidth, yAxis]
-    this.topLeft=[xAxis,yAxis+blockHeight]
-    this.topRight=[xAxis+blockWidth,yAxis+blockHeight]
-    }
+function setupInput(){
+    window.addEventListener("keydown", handleInput,{once:true})
 }
-//all of the blocks
-const blockArray=[
-    new Block(10,270),
-    new Block(120,270),
-    new Block(230,270),
-    new Block(340,270),
-    new Block(450,270),
-    new Block(10,240),
-    new Block(120,240),
-    new Block(230,240),
-    new Block(340,240),
-    new Block(450,240),
-    new Block(10,210),
-    new Block(120,210),
-    new Block(230,210),
-    new Block(340,210),
-    new Block(450,210),
-]
-
-// To add a single block
-// function addBlock(){
-// const block = document.createElement('div')
-// block.classList.add('block')
-// block.style.left='100px'
-// block.style.bottom='50px'
-// grid.appendChild(block)
-// }
-// addBlock()
-
-function addMultiBlock(){
-    for(let i=0;i<blockArray.length;i++){
-        const indivBlock = document.createElement('div')
-        indivBlock.classList.add('blockcss')
-        indivBlock.style.left=blockArray[i].bottomLeft[0]+'px'
-        indivBlock.style.bottom=blockArray[i].bottomLeft[1]+'px'
-        grid.appendChild(indivBlock)
-    }
-}
-addMultiBlock()
-
-//draw user
-function drawUser(){
-    userblock.style.left= currentPosition[0]+'px'
-    userblock.style.bottom= currentPosition[1]+'px'
-}
-
-//draw ball
-function drawBall(){
-    ball.style.left=ballCurrentPosition[0]+'px'
-    ball.style.bottom=ballCurrentPosition[1]+'px'
-}
-
-
-
-//add userbblock
-const userblock = document.createElement('div')
-userblock.classList.add('usercss')
-drawUser()
-grid.appendChild(userblock)
-
-//move user
-function moveUser(e){
+function handleInput(e){
+    console.log(e.key)
     switch(e.key){
-        case 'ArrowLeft':
-            if(currentPosition[0]>0)
-            {
-            currentPosition[0]-=10
-            drawUser()
+       case "ArrowUp": 
+        moveUp()
+        break
+       case "ArrowDown": 
+        moveDown()
+        break
+       case "ArrowLeft": 
+        moveLeft()
+        break
+       case "ArrowRight": 
+        moveRight()
+        break
+       default:
+            setupInput()
+            return
+    }
+
+    setupInput()
+    console.log(grid.cellsByColumn)
+
+}
+
+function moveUp() {
+    return slideTiles(grid.cellsByColumn)
+}
+function moveDown() {
+    return slideTiles(grid.cellsByColumn.map(column => [...column].reverse()))
+}
+
+function moveLeft() {
+    return slideTiles(grid.cellsByRow)
+}
+function moveRight() {
+    return slideTiles(grid.cellsByRow.map(row=> [...row].reverse()))
+}
+
+function slideTiles(cells){
+    cells.forEach(group=>{
+        for(let i=1;i<group.length;i++)
+        {
+            const cell =group[i]
+            if (cell.tile==null) continue
+            let lastValidTileCell
+            for(let j= i - 1; j >=0; j--){
+                const moveToCell =group[j]
+                if(!moveToCell.canAccept(cell.tile)) break
+                lastValidTileCell = moveToCell
             }
-            break;
-        
-        case 'ArrowRight':
-            if(currentPosition[0]< boardWidght-blockWidth )
-            {
-            currentPosition[0]+=10
-            drawUser()
-            break
-        }}
-}
-document.addEventListener('keydown',moveUser)
-
-//add ball
-const ball=document.createElement('div')
-ball.classList.add('ballcss')
-drawBall()
-grid.appendChild(ball)
-
-//move ball
-function moveBall(){
-    ballCurrentPosition[0]+=xDirections
-    ballCurrentPosition[1]+=yDirections
-    drawBall()
-    checkForCollisions()
-}
-
-timerID= setInterval(moveBall,30)
-
-//check for collisions
-function checkForCollisions(){
-    //check for block collisions
-    for(let i=0;i<blockArray.length;i++)
-    {
-    if((ballCurrentPosition[0]>blockArray[i].bottomLeft[0]&& ballCurrentPosition[0]<blockArray[i].bottomRight[0])&&((ballCurrentPosition[1]+ballDiameter)>blockArray[i].bottomLeft[1]) 
-    && ballCurrentPosition[1]<blockArray[i].topLeft[1]){
-        const allBlocks =Array.from(document.querySelectorAll('.blockcss'))///////chchchchchc
-        allBlocks[i].classList.remove('blockcss')
-        blockArray.splice(i,1)
-        changeDirection()
-
-        score++
-        scoreDisplay.innerHTML=score
-
-        //check for win
-        if(blockArray.length === 0){
-            scoreDisplay.innerHTML="You Win"
-            clearInterval(timerID)
-            document.removeEventListener('keydown', moveUser)
+            if(lastValidTileCell != null){
+                if(lastValidTileCell.tile !=null){
+                    lastValidTileCell.mergeTile=cell.tile
+                }
+                    else{
+                        lastValidTileCell.tile=cell.tile
+                    }
+                    cell.tile=null
+                }
+            }
         }
-    }
-    }
-
-
-    //check for wall collisions
-    if(ballCurrentPosition[0]>=(boardWidght- ballDiameter)|| ballCurrentPosition[1]>=(boardHeight-ballDiameter) || ballCurrentPosition[0]<=0)
-    {
-        changeDirection()
-    }
-
-//check for usercollisions
-
-if ((ballCurrentPosition[0]>currentPosition[0] && ballCurrentPosition[0]<currentPosition[0]+blockWidth)
-&& (ballCurrentPosition[1]>currentPosition[1] && ballCurrentPosition[1]< currentPosition[1]+blockHeight))
-{
-    changeDirection()
+)
 }
-
-//check for game over
-if(ballCurrentPosition[1]<=0)
-{
-    clearInterval(timerID)
-    scoreDisplay.innerHTML='You Lose'
-    console.log("You loose")
-    document.removeEventListener('keydown', moveUser)
-    
-}}
-   
-
-function changeDirection(){
-    if(xDirections === 2 && yDirections===2){
-        yDirections=-2
-        return
-    }
-    if(xDirections === 2 && yDirections === -2){
-        xDirections=-2
-        return
-    }
-    if(xDirections ===-2 && yDirections === -2)
-    {
-        yDirections=2 
-        return
-    }
-    if(xDirections ===-2 && yDirections === 2){
-        xDirections=2
-        return
-    }
-
-
-}
-
